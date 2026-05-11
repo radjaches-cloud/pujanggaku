@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pujanggaku - Perburuan Sajak Hilang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700;900&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #e6d5b8;
+            --wood: #1a120b;
+            --gold: #d4af37;
+        }
+        body { 
+            background: var(--wood);
+            background-image: url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            font-family: 'Lora', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--paper);
+        }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .judul-font { font-family: 'Playfair Display', serif; }
+
+        /* Layar Kertas Perkamen */
+        .scroll-paper {
+            background: var(--paper);
+            background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+            transform-origin: top;
+            box-shadow: inset 0 0 80px rgba(89, 60, 41, 0.4);
+            border-left: 1px solid rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .unroll-anim { animation: unroll 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        @keyframes unroll {
+            0% { transform: scaleY(0); opacity: 0; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+
+        .roller {
+            height: 40px;
+            background: linear-gradient(to right, #2d1f15, #8b5e3c, #2d1f15);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+            z-index: 50;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* Tombol Segel Lilin (Wax Seal) */
+        .wax-seal {
+            background: #8b0000;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.5);
+            border: 4px solid #a52a2a;
+            cursor: pointer;
+            transition: 0.4s;
+        }
+        .wax-seal:hover { transform: scale(1.1) rotate(5deg); filter: brightness(1.2); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37 0%, #8b6d1b 100%);
+            color: #1a120b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .fade-in { animation: fadeIn 1.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+
+    <section id="opening-ui" class="fade-in min-h-screen flex flex-col items-center justify-center text-center px-6">
+        <h2 class="font-cinzel text-gold tracking-[0.5em] text-xs mb-4 opacity-70">The Lost Anthology</h2>
+        <h1 class="judul-font text-6xl md:text-8xl text-stone-100 mb-8 font-900 filter drop-shadow-2xl">Pujanggaku</h1>
+        
+        <div class="wax-seal mb-8" onclick="showTutorial()">
+            <span class="font-cinzel text-white text-3xl font-bold">P</span>
+        </div>
+        
+        <p class="italic text-stone-400 tracking-widest text-sm max-w-sm">"Tekan segel untuk membuka rahasia sajak yang hilang."</p>
+    </section>
+
+    <main id="main-container" class="hidden w-full max-w-2xl relative my-10 px-4">
+        <div class="roller relative -mb-3"></div>
+        
+        <div id="paper" class="scroll-paper min-h-[550px] p-8 md:p-14 flex flex-col">
+            
+            <div id="tutorial-ui" class="flex-grow flex flex-col items-center text-center">
+                <h2 class="font-cinzel text-amber-900 text-2xl font-bold mb-8 border-b-2 border-amber-900/10 pb-2 w-full">Misi Kepujanggaan</h2>
+                <ul class="text-stone-800 space-y-6 italic text-sm md:text-base leading-relaxed mb-12">
+                    <li class="flex items-center gap-4 text-left"><span class="text-2xl">📜</span> Kamu akan menjelajahi ribuan bait sajak klasik hingga masa kini.</li>
+                    <li class="flex items-center gap-4 text-left"><span class="text-2xl">🖋️</span> Tugasmu: Melengkapi **Diksi yang Hilang** untuk menyempurnakan jiwa sajak.</li>
+                    <li class="flex items-center gap-4 text-left"><span class="text-2xl">⏳</span> Selesaikan sebelum tinta kering (waktu habis) untuk skor tertinggi.</li>
+                </ul>
+                <button onclick="startGame()" class="btn-gold px-12 py-3 rounded-full font-bold uppercase tracking-widest text-xs">Mulai Perburuan</button>
+            </div>
+
+            <div id="game-ui" class="hidden flex-grow flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-8 border-b border-stone-900/10 pb-4">
+                    <div class="text-[10px] font-bold text-amber-900 uppercase tracking-widest">Gelar: <span id="rank-label" class="text-amber-600">Pencari</span></div>
+                    <div class="text-[10px] font-bold text-amber-900 uppercase tracking-widest">Skor: <span id="score-label" class="text-stone-900 text-sm">0</span></div>
+                </div>
+
+                <div class="flex-grow flex flex-col justify-center">
+                    <p id="poet-name" class="text-center text-[10px] font-bold text-amber-900/50 uppercase tracking-[0.3em] mb-4"></p>
+                    <div id="text-display" class="text-xl md:text-2xl text-center leading-relaxed text-stone-900 italic font-medium whitespace-pre-line mb-12"></div>
+                    <div id="options-grid" class="grid grid-cols-1 gap-3"></div>
+                </div>
+            </div>
+
+            <div id="edu-ui" class="hidden text-center fade-in">
+                <h3 id="feedback-msg" class="judul-font text-4xl mb-6"></h3>
+                <div class="bg-amber-900/5 p-6 rounded-2xl border border-amber-900/10 mb-8 italic shadow-inner text-stone-800 leading-relaxed text-sm">
+                    <p id="analysis-text"></p>
+                </div>
+                <button onclick="fetchNext()" class="btn-gold px-10 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-xs">Gulungan Selanjutnya</button>
+            </div>
+
+        </div>
+
+        <div class="roller relative -mt-3"></div>
+        
+        <div id="timer-ui" class="hidden mt-6 text-center">
+            <p class="text-amber-100/40 text-[10px] uppercase tracking-[0.4em] mb-2">Sisa Waktu</p>
+            <div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                <div id="timer-bar" class="h-full bg-gold transition-all duration-1000" style="width: 100%"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Database Sajak Terkurasi (Klasik & Modern)
+        const poetryQuest = [
+            { t: "Aku ingin mencintaimu dengan [sederhana]", p: "Sapardi Djoko Damono", k: "sederhana", o: ["sederhana", "sempurna", "setia"], e: "Bagi Sapardi, puncak cinta adalah kesederhanaan; mencintai tanpa perlu kerumitan kata-kata." },
+            { t: "Cintaku jauh di [pulau],\ngadis manis, sekarang iseng sendiri", p: "Chairil Anwar", k: "pulau", o: ["pulau", "rantau", "sepi"], e: "Diksi 'pulau' menggambarkan jarak emosional dan fisik yang tak terjangkau." },
+            { t: "Tak ada yang lebih [tabah]\ndari hujan bulan Juni", p: "Sapardi Djoko Damono", k: "tabah", o: ["tabah", "indah", "sabar"], e: "Tabah adalah personifikasi hujan yang menahan diri demi kerinduan yang lebih besar." },
+            { t: "Lihatlah, [kenangan]\nhanya bisa dirawat, bukan dimiliki", p: "Aan Mansyur", k: "kenangan", o: ["kenangan", "harapan", "masa lalu"], e: "Aan Mansyur (Penyair Masa Kini) memandang masa lalu sebagai sesuatu yang rapuh untuk dirawat." },
+            { t: "Hujan itu seperti [rindu],\ndia jatuh berulang-ulang tanpa rasa sakit", p: "Adimas Immanuel", k: "rindu", o: ["pilu", "rindu", "doa"], e: "Rindu dalam sajak masa kini sering dianalogikan dengan hujan yang datang alami dan tenang." },
+            { t: "Sebab [perpisahan]\nadalah cara mencintai yang paling sunyi", p: "Theoresia Rumthe", k: "perpisahan", o: ["pertemuan", "kerinduan", "perpisahan"], e: "Mencintai dalam perpisahan adalah bentuk pengorbanan yang paling hening." },
+            { t: "Kesedihan itu seperti [celana],\nia harus dicuci agar tak berbau", p: "Joko Pinurbo", k: "celana", o: ["baju", "celana", "luka"], e: "Gaya satir Joko Pinurbo yang menggunakan benda sehari-hari sebagai metafora kehidupan." },
+            { t: "Pada akhirnya, kita hanya [asing]\nyang saling meminjam pelukan", p: "Wira Nagara", k: "asing", o: ["asing", "teman", "bayangan"], e: "Menggambarkan kerenggangan hubungan manusia yang modern dan rapuh." },
+            { t: "Kau adalah [rumah],\ntempat segala kesedihanku pulang", p: "M. Aan Mansyur", k: "rumah", o: ["tujuan", "rumah", "kota"], e: "Rumah sebagai simbol kenyamanan untuk menunjukkan sisi terlemah manusia." },
+            { t: "Di bawah [langit]\nyang sama, kita merayakan jarak", p: "Theoresia Rumthe", k: "langit", o: ["langit", "atap", "bulan"], e: "Langit yang luas menyatukan dua orang yang terpisah secara fisik." }
+        ];
+
+        let score = 0;
+        let usedIndices = [];
+        let timer;
+        let currentIdx;
+
+        function showTutorial() {
+            document.getElementById('opening-ui').classList.add('hidden');
+            document.getElementById('main-container').classList.remove('hidden');
+            document.getElementById('paper').classList.add('unroll-anim');
+        }
+
+        function startGame() {
+            document.getElementById('tutorial-ui').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.getElementById('timer-ui').classList.remove('hidden');
+            fetchNext();
+        }
+
+        function fetchNext() {
+            if (usedIndices.length === poetryQuest.length) usedIndices = [];
+
+            let idx;
+            do { idx = Math.floor(Math.random() * poetryQuest.length); } 
+            while (usedIndices.includes(idx));
+            
+            usedIndices.push(idx);
+            currentIdx = idx;
+            const data = poetryQuest[idx];
+
+            // Reset UI
+            document.getElementById('paper').style.animation = 'none';
+            void document.getElementById('paper').offsetWidth;
+            document.getElementById('paper').style.animation = 'unroll 1.2s forwards';
+
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.getElementById('edu-ui').classList.add('hidden');
+
+            document.getElementById('poet-name').innerText = `Oleh: ${data.p}`;
+            document.getElementById('text-display').innerText = data.t.replace(`[${data.k}]`, ".......");
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            data.o.sort(() => Math.random() - 0.5).forEach(o => {
+                const b = document.createElement('button');
+                b.className = "p-4 bg-white/40 border-2 border-stone-900/5 rounded-xl text-xs font-bold uppercase tracking-widest text-stone-800 hover:bg-stone-900 hover:text-amber-50 transition-all";
+                b.innerText = o;
+                b.onclick = () => verify(o, data);
+                grid.appendChild(b);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            let left = 25;
+            const bar = document.getElementById('timer-bar');
+            clearInterval(timer);
+            
+            timer = setInterval(() => {
+                left -= 0.1;
+                bar.style.width = `${(left/25)*100}%`;
+                if(left <= 0) verify(null, poetryQuest[currentIdx]);
+            }, 100);
+        }
+
+        function verify(ans, data) {
+            clearInterval(timer);
+            const isCorrect = ans === data.k;
+            if(isCorrect) score += 100 + Math.round(parseFloat(document.getElementById('timer-bar').style.width) * 2);
+            
+            document.getElementById('score-label').innerText = score;
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('edu-ui').classList.remove('hidden');
+
+            const msg = document.getElementById('feedback-msg');
+            msg.innerText = isCorrect ? "Sempurna!" : "Belum Tepat";
+            msg.className = `judul-font text-4xl mb-6 ${isCorrect ? 'text-green-800' : 'text-red-900'}`;
+            
+            document.getElementById('analysis-text').innerText = data.e;
+
+            // Adaptive Label
+            const r = document.getElementById('rank-label');
+            if(score > 1500) r.innerText = "Maestro";
+            else if(score > 700) r.innerText = "Sastrawan";
+        }
+    </script>
+</body>
+</html>
